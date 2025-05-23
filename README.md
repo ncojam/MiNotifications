@@ -10,18 +10,6 @@
 
 ---
 
-## 📦 Files to include in the repository
-
-Make sure your repository contains the following files:
-
-- `server_monitor.py` – main Python script
-- `run_monitor.sh` – (Linux only) script to activate the environment and run the parser
-- `README.md` – this documentation
-
-You may optionally include a `.gitignore` to ignore the virtual environment directory (e.g. `minotif/`).
-
----
-
 ## 🛠️ Setup Guide
 
 ### Step 1: Create a Telegram Bot
