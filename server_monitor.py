@@ -10,37 +10,58 @@ SERVER_IP = "your server IP"
 CHECK_INTERVAL = 10  # secons
 TELEGRAM_TOKEN = "your token"
 CHAT_ID = -1002222333444  # your chat_id
-COOLDOWN_HOURS = 2
+COOLDOWN_HOURS = 1
 
 # === INITIALIZATION ===
 bot = Bot(token=TELEGRAM_TOKEN)
 server = JavaServer.lookup(SERVER_IP)
 
-cooldowns = {}  # {nickname: last login datetime}
+player_status = {}  # {nickname: (online: bool, last_notification: datetime)}
+initial_check_done = False  # Lasst check completion flag
 
 logging.basicConfig(level=logging.INFO)
 
 async def check_server():
-	while True:
-		try:
-			status = server.status()
-			now = datetime.now()
+    global initial_check_done
+    
+    while True:
+        try:
+            status = server.status()
+            now = datetime.now()
+            current_players = {p.name for p in status.players.sample} if status.players.sample else set()
 
-			if status.players.sample:
-				for player in status.players.sample:
-					name = player.name
-					last_seen = cooldowns.get(name)
+            # First check - only save status
+            if not initial_check_done:
+                for name in current_players:
+                    player_status[name] = (True, None)  # Save online-status with no notification
+                logging.info(f"Initial check: {len(current_players)} players online")
+                initial_check_done = True
+                await asyncio.sleep(CHECK_INTERVAL)
+                continue
+            
+            # Next checks - regular procedure
+            all_players = set(player_status.keys()).union(current_players)
+            
+            for name in all_players:
+                is_online = name in current_players
+                last_data = player_status.get(name, (False, None))
+                was_online, last_notification = last_data
+                
+                if is_online and not was_online:  # Player joined
+                    if last_notification is None or (now - last_notification) > timedelta(hours=COOLDOWN_HOURS):
+                        await bot.send_message(chat_id=CHAT_ID, text=f"🎮 Player {name} joined the server!")
+                        player_status[name] = (True, now)
+                    else:
+                        player_status[name] = (True, last_notification)
+                elif not is_online:  # Игрок вышел
+                    player_status[name] = (False, last_notification)
 
-					if not last_seen or now - last_seen > timedelta(hours=COOLDOWN_HOURS):
-						await bot.send_message(chat_id=CHAT_ID, text=f"🎮 Player {name} joined the server!")
-						cooldowns[name] = now
-			else:
-				logging.info("Server's empty.")
+            logging.info(f"Check complete. Online: {len(current_players)} players.")
 
-		except Exception as e:
-			logging.warning(f"Error parsing server: {e}")
+        except Exception as e:
+            logging.warning(f"Error parcing the server: {e}")
 
-		await asyncio.sleep(CHECK_INTERVAL)
+        await asyncio.sleep(CHECK_INTERVAL)
 
 if __name__ == "__main__":
-	asyncio.run(check_server())
+    asyncio.run(check_server())
