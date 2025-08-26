@@ -5,6 +5,11 @@ from datetime import datetime, timedelta
 from mcstatus import JavaServer
 from telegram import Bot
 
+try:
+	import discord_module
+except ImportError:
+	discord_module = None
+
 # === SETTINGS ===
 SERVER_IP = "your server IP"
 CHECK_INTERVAL = 10  # secons
@@ -55,6 +60,8 @@ async def check_server():
                             text=f"🎮 Player {name} joined the server!",
                             reply_to_message_id=THREAD_ID # Remove this if you need to post to general
                         )
+                        if discord_module and discord_module.ENABLED:
+                            discord_module.send_message(f"🎮 Player {name} joined the server!")
                         player_status[name] = (True, now)
                     else:
                         player_status[name] = (True, last_notification)
