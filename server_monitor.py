@@ -10,6 +10,7 @@ SERVER_IP = "your server IP"
 CHECK_INTERVAL = 10  # secons
 TELEGRAM_TOKEN = "your token"
 CHAT_ID = -1002222333444  # your chat_id
+THREAD_ID = 3 # your thread_id
 COOLDOWN_HOURS = 1
 
 # === INITIALIZATION ===
@@ -17,7 +18,7 @@ bot = Bot(token=TELEGRAM_TOKEN)
 server = JavaServer.lookup(SERVER_IP)
 
 player_status = {}  # {nickname: (online: bool, last_notification: datetime)}
-initial_check_done = False  # Lasst check completion flag
+initial_check_done = False  # Last check completion flag
 
 logging.basicConfig(level=logging.INFO)
 
@@ -49,7 +50,11 @@ async def check_server():
                 
                 if is_online and not was_online:  # Player joined
                     if last_notification is None or (now - last_notification) > timedelta(hours=COOLDOWN_HOURS):
-                        await bot.send_message(chat_id=CHAT_ID, text=f"🎮 Player {name} joined the server!")
+                        await bot.send_message(
+                            chat_id=CHAT_ID,
+                            text=f"🎮 Player {name} joined the server!",
+                            reply_to_message_id=THREAD_ID # Remove this if you need to post to general
+                        )
                         player_status[name] = (True, now)
                     else:
                         player_status[name] = (True, last_notification)
