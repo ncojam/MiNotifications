@@ -60,12 +60,12 @@ async def check_server():
                             text=f"🎮 Player {name} joined the server!",
                             reply_to_message_id=THREAD_ID # Remove this if you need to post to general
                         )
-                        if discord_module and discord_module.ENABLED:
+                        if discord_module and discord_module.ENABLED: # This may work wrong, I removed this string from my file
                             discord_module.send_message(f"🎮 Player {name} joined the server!")
                         player_status[name] = (True, now)
                     else:
                         player_status[name] = (True, last_notification)
-                elif not is_online:  # Игрок вышел
+                elif not is_online:  # Player left the server
                     player_status[name] = (False, last_notification)
 
             logging.info(f"Check complete. Online: {len(current_players)} players.")
