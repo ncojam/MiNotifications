@@ -21,6 +21,11 @@ def send_message(content: str):
 	}
 	data = {"content": content}
 
-	resp = requests.post(url, headers=headers, json=data)
-	if resp.status_code not in (200, 201):
-		logging.warning(f"Discord error: {resp.status_code} {resp.text}")
+	try:
+		resp = requests.post(url, headers=headers, json=data, timeout=10)
+		if resp.status_code not in (200, 201):
+			logging.warning(f"Discord error: {resp.status_code} {resp.text}")
+	except requests.exceptions.Timeout:
+		logging.error("Discord request timed out (no response in 10s)")
+	except requests.exceptions.RequestException as e:
+		logging.error(f"Discord request failed: {e}")
