@@ -1,11 +1,11 @@
 # MiNotifications
-**MiNotifications** is a Telegram bot that notifies you when a player joins your private Minecraft server. It periodically checks the server using `mcstatus` and sends a message to your private Telegram channel with the player's name.
+**MiNotifications** is a Telegram (and now Discord) bot that notifies you when a player joins your private Minecraft server. It periodically checks the server using `mcstatus` and sends a message to your private Telegram channel with the player's name.
 
 ## 🔧 Features
 
 - Minecraft Java server player join notifications
 - Cooldown system to avoid repeated messages from the same player
-- Telegram bot integration
+- Telegram/Discord bot integration
 - Optional bash script for easier launch on Linux
 
 ---
